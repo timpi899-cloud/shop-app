@@ -13,20 +13,21 @@ class User extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
 
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
+     * Mass assignable attributes
      */
     protected $fillable = [
         'name',
         'email',
         'password',
+        'phone',
+        'address',
+        'role',
+        'is_member',
+        'member_until',
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
+     * Hidden attributes for serialization
      */
     protected $hidden = [
         'password',
@@ -34,11 +35,37 @@ class User extends Authenticatable
     ];
 
     /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
+     * Casts
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'is_member' => 'boolean',
+        'member_until' => 'datetime',
     ];
+
+    /**
+     * Relasi ke memberships
+     */
+    public function memberships()
+    {
+        return $this->belongsToMany(Membership::class, 'user_memberships')
+                    ->withPivot('start_at', 'end_at')
+                    ->withTimestamps();
+    }
+
+    /**
+     * Relasi ke cart
+     */
+    public function carts()
+    {
+        return $this->hasMany(Cart::class);
+    }
+
+    /**
+     * Relasi ke orders
+     */
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
 }

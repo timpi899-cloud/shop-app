@@ -1,48 +1,40 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\InvoicePembelian;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\MembershipController;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
 
+// ================== AUTH ==================
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+
+Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+Route::post('/register', [AuthController::class, 'register'])->name('register.post');
+
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+
+// ================== DASHBOARD ROUTES ==================
+Route::middleware(['auth'])->group(function () {
+
+    // Dashboard user biasa
+    Route::get('/user/dashboard', [DashboardController::class, 'user'])
+        ->name('user.dashboard');
+
+    // Dashboard admin
+    Route::middleware(['admin'])->group(function () {
+        Route::get('/admin/dashboard', [DashboardController::class, 'admin'])
+            ->name('admin.dashboard');
+    });
+});
+
+
+// ================== DEFAULT ROUTE ==================
 Route::get('/', function () {
-    return view('dashboard');
+    return redirect()->route('login');
 });
-
-
-Route::post('/kirim-invoice', function () {
-
-    $email = 'pywardenbz@gmail.com';
-
-    try {
-        Mail::to($email)->send(new InvoicePembelian());
-        return back()->with('success', 'Invoice berhasil dikirim!');
-    } catch (\Exception $e) {
-        return back()->with('error', 'Gagal kirim email: ' . $e->getMessage());
-    }
-    
-});
-
-Route::get('/cek-mail', function () {
-    return config('mail.mailers.smtp.host');
-});
-
-Route::get('/test-email', function () {
-    try {
-        Mail::to('alamat-email-tes@gmail.com')->send(new InvoicePembelian());
-        return "✅ Email berhasil dikirim (cek inbox/spam)";
-    } catch (Exception $e) {
-        return "❌ Error: " . $e->getMessage();
-    }
-});
-
