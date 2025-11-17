@@ -2,22 +2,31 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     *
-     * @return void
-     */
     public function run()
     {
-        // \App\Models\User::factory(10)->create();
-
+        // Seed admin lewat seeder khusus
         $this->call([
             AdminUserSeeder::class,
         ]);
+
+        // Seed user biasa, aman dari duplicate
+        User::firstOrCreate(
+            ['email' => 'user@gmail.com'],
+            [
+                'name' => 'Jhon Doe',
+                'password' => Hash::make('123456'),
+                'role' => 'user', 
+                'phone' => '081234567890',
+                'address' => 'Alamat User',
+                'is_member' => true,
+                'member_until' => now()->addYear(),
+            ]
+        );
     }
 }
